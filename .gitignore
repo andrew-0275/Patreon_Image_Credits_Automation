@@ -1,0 +1,7 @@
+# General
+*.txt
+.env
+*.csv
+
+# Specific
+Corey schafer script.py
