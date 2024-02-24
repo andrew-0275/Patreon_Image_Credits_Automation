@@ -8,6 +8,11 @@ from dotenv import load_dotenv
 import pandas as pd
 import datetime
 
+
+
+# Current date in YYYY-MM-DD format
+current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -69,29 +74,51 @@ fetch_patrons(f'{base_url}{endpoint}')
 # Convert the list of dictionaries into a DataFrame
 patrons_df = pd.DataFrame(patrons_data)
 
-# Save the DataFrame to a CSV file
-patrons_df.to_csv('patrons_members.csv', index=False)
 
 
 
-# Current date in YYYY-MM-DD format
-current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-
-# Filter the DataFrame to include only active patrons
-active_patrons_df = patrons_df[patrons_df['Patron Status'] == 'active_patron']
-
-# Filename with current date
-filename = f'active_patron_members_{current_date}.csv'
-
-# Save the filtered DataFrame to a new CSV file
-active_patrons_df.to_csv(filename, index=False)
-
-print(f'Active patron members saved to {filename}')
+# # all patrons info CSV
+# patrons_df.to_csv('patrons_members.csv', index=False)
 
 
 
 
 
+
+# # Filter the DataFrame to include only active patrons
+# active_patrons_df = patrons_df[patrons_df['Patron Status'] == 'active_patron']
+
+# # Filename with current date
+# filename = f'active_patron_members_{current_date}.csv'
+
+# # Save the filtered DataFrame to a new CSV file
+# active_patrons_df.to_csv(filename, index=False)
+
+# print(f'Active patron members saved to {filename}')
+
+
+
+
+
+# Filter the DataFrame to include only active patrons who are on a $5 and above tier
+# Ensure the 'Currently Entitled Amount Cents' is interpreted correctly for comparison
+active_5_above_df = patrons_df[(patrons_df['Patron Status'] == 'active_patron') & (patrons_df['Currently Entitled Amount Cents'] >= 500)]
+
+# Filename for saving the filtered DataFrame
+filename = f'active_patrons_5_above_{current_date}.csv'
+
+# Save the filtered DataFrame to the new CSV file
+active_5_above_df.to_csv(filename, index=False)
+
+print(f'Filtered active patrons on $5 and above tier saved to {filename}')
+      
+
+
+
+
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 def get_campaign_id():
     url = 'https://www.patreon.com/api/oauth2/api/current_user/campaigns'
@@ -113,5 +140,11 @@ def get_campaign_id():
     else:
         print(f"Failed to fetch campaign data: {response.status_code}")
         return None
+
+
+
+
+
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 
