@@ -6,7 +6,7 @@ import requests
 import os
 from dotenv import load_dotenv
 import pandas as pd
-import json
+import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,7 +19,7 @@ CAMPAIGN_ID = '3725823'  # Example campaign ID
 base_url = 'https://www.patreon.com/api/oauth2/v2'
 
 # Specify the fields you want to include for each member
-fields_members = 'full_name,patron_status,last_charge_status,currently_entitled_amount_cents'
+fields_members = 'full_name,patron_status,last_charge_date,last_charge_status,lifetime_support_cents,currently_entitled_amount_cents,pledge_relationship_start,is_follower,email'
 
 # Specify the endpoint for fetching campaign members, including desired fields
 endpoint = f'/campaigns/{CAMPAIGN_ID}/members?fields[member]={fields_members}'
@@ -29,8 +29,8 @@ headers = {
     'Authorization': f'Bearer {ACCESS_TOKEN}',
 }
 
-# Initialize a list to hold all patrons' full names
-patrons_full_names = []
+# Initialize a list to hold patron data
+patrons_data = []
 
 # Function to make the API request and process the response
 def fetch_patrons(url):
@@ -38,10 +38,19 @@ def fetch_patrons(url):
     if response.status_code == 200:
         data = response.json()
         for member in data.get('data', []):
-            # Extract and print the full name of each member
-            full_name = member['attributes'].get('full_name')
-            patrons_full_names.append(full_name)
-            #print(full_name)
+            # Collect required information for each member
+            member_info = {
+                'Full Name': member['attributes'].get('full_name'),
+                'Patron Status': member['attributes'].get('patron_status'),
+                'Last Charge Date': member['attributes'].get('last_charge_date'),
+                'Last Charge Status': member['attributes'].get('last_charge_status'),
+                'Lifetime Support Cents': member['attributes'].get('lifetime_support_cents'),
+                'Currently Entitled Amount Cents': member['attributes'].get('currently_entitled_amount_cents'),
+                'Pledge Relationship Start': member['attributes'].get('pledge_relationship_start'),
+                'Is Follower': member['attributes'].get('is_follower'),
+                'Email': member['attributes'].get('email')  # Ensure you have the correct permissions to access this
+            }
+            patrons_data.append(member_info)
         
         # Check for pagination and fetch next page if exists
         next_page = data['meta']['pagination'].get('cursors', {}).get('next')
@@ -51,12 +60,36 @@ def fetch_patrons(url):
     else:
         print(f'Failed to fetch patrons: {response.status_code}')
 
+# Define the base URL for Patreon API
+base_url = 'https://www.patreon.com/api/oauth2/v2'
+
 # Start fetching patrons
 fetch_patrons(f'{base_url}{endpoint}')
 
-# Optionally, convert the list of full names into a DataFrame or save it as needed
-patrons_df = pd.DataFrame(patrons_full_names, columns=['Full Name'])
+# Convert the list of dictionaries into a DataFrame
+patrons_df = pd.DataFrame(patrons_data)
+
+# Save the DataFrame to a CSV file
 patrons_df.to_csv('patrons_members.csv', index=False)
+
+
+
+# Current date in YYYY-MM-DD format
+current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+
+# Filter the DataFrame to include only active patrons
+active_patrons_df = patrons_df[patrons_df['Patron Status'] == 'active_patron']
+
+# Filename with current date
+filename = f'active_patron_members_{current_date}.csv'
+
+# Save the filtered DataFrame to a new CSV file
+active_patrons_df.to_csv(filename, index=False)
+
+print(f'Active patron members saved to {filename}')
+
+
+
 
 
 

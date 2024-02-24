@@ -2,6 +2,7 @@
 *.txt
 .env
 *.csv
+*.xlsx
 
 # Specific
 Corey schafer script.py
