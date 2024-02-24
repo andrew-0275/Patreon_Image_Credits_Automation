@@ -3,6 +3,9 @@
 .env
 *.csv
 *.xlsx
+*/
+*.jpg
+*.png
 
 # Specific
 Corey schafer script.py
