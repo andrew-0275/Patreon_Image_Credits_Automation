@@ -14,7 +14,7 @@ def fetch_patrons_10():
 
     # Access environment variables
     ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
-    CAMPAIGN_ID = os.getenv('CAMPAIGN_ID')  # Consider moving this to an environment variable
+    CAMPAIGN_ID = os.getenv('CAMPAIGN_ID')
 
     # Set the base URL for Patreon API
     base_url = 'https://www.patreon.com/api/oauth2/v2'

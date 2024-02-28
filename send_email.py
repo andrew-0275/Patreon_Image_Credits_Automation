@@ -12,37 +12,45 @@ def send_image_via_email():
     load_dotenv()
     email_sender = os.getenv('EMAIL_SENDER')
     email_password = os.getenv('EMAIL_PASSWORD')
-    email_recipient = os.getenv('EMAIL_RECIPIENT')
-
-    # Create message
-    msg = MIMEMultipart()
-    msg['From'] = email_sender
-    msg['To'] = email_recipient
-    msg['Subject'] = "Patron Credits Image"
     
-    # Email body
-    body = "Attached is the latest Patron Credits image."
-    msg.attach(MIMEText(body, 'plain'))
+    # Assuming EMAIL_RECIPIENT now contains multiple email addresses separated by a comma
+    email_recipients = os.getenv('EMAIL_RECIPIENTS').split(',')
     
-    # Attach the image
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    filename = f"patrons_credits_{current_date}.png"
-    filepath = os.path.join(os.getcwd(), filename)  # Assumes file is in the current working directory
-    with open(filepath, "rb") as attachment:
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read())
-    encoders.encode_base64(part)
-    part.add_header('Content-Disposition', f"attachment; filename= {filename}")
-    msg.attach(part)
-    
-    # Connect to the server and send the email
+    # Connect to the server
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(email_sender, email_password)
-        server.sendmail(email_sender, email_recipient, msg.as_string())
+        
+        for email_recipient in email_recipients:
+            # Create message for each recipient
+            msg = MIMEMultipart()
+            msg['From'] = email_sender
+            msg['To'] = email_recipient  # Single recipient for this email
+            
+            # Format the current month and year for the subject line
+            current_month_year = datetime.datetime.now().strftime("%B %Y")  # "%B" gives the full month name, "%Y" gives the four-digit year
+            msg['Subject'] = f"Patron Credits Image {current_month_year}"
+            
+            # Email body
+            body = "Attached is the latest patron credits image for this month."
+            msg.attach(MIMEText(body, 'plain'))
+            
+            # Attach the image
+            current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+            filename = f"patrons_credits_{current_date}.png"
+            filepath = os.path.join(os.getcwd(), filename)  # Assumes file is in the current working directory
+            with open(filepath, "rb") as attachment:
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', f"attachment; filename= {filename}")
+            msg.attach(part)
+            
+            # Send the email to the current recipient
+            server.sendmail(email_sender, email_recipient, msg.as_string())
+            print(f"Email sent successfully to {email_recipient}.")
 
 def main():
     send_image_via_email()
-    print("Email sent successfully.")
 
 if __name__ == "__main__":
     main()

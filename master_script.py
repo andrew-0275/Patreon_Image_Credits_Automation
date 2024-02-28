@@ -8,7 +8,7 @@ def main():
     # Fetch and save $10 and above patrons into a CSV
     fetch_patrons_10()
     
-    # Create image from patron data
+    # Create image from patron data CSV
     generate_patron_credits_image()
     
     # Send the image via email
